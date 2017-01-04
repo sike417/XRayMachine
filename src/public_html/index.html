@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>X-Ray Machine</title>
+        <link rel="icon" type="image/x-icon" href="Assets/Icons/icon.jpg">
+        <!-- external library -->
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+        <script type="text/javascript" src="src/lib/gl-matrix.js"></script>
+        <script type="text/javascript" src="src/lib/webgl-obj-loader.js"></script>
+
+        <!-- Engine code: Graphics Support -->
+        <!-- Core of Engine -->
+        <script type="text/javascript" src="src/Engine/Core/Engine_Core.js"></script>
+        <script type="text/javascript" src="src/Engine/Core/Engine_VertexBuffer.js"></script>
+        <script type="text/javascript" src="src/Engine/Core/Engine_MouseSupport.js"></script>
+        <script type="text/javascript" src="src/Engine/Shaders/SimpleShader.js"></script>
+        <script type="text/javascript" src="src/Engine/Shaders/ColorVertexShader.js"></script>
+        <script type="text/javascript" src="src/Engine/Shaders/FileTextureShader.js"></script>
+        <script type="text/javascript" src="src/Engine/Renderable/Renderable.js"></script>
+        <script type="text/javascript" src="src/Engine/Renderable/SquareRenderable.js"></script>
+        <script type="text/javascript" src="src/Engine/Renderable/MeshRenderable.js"></script>
+        <script type="text/javascript" src="src/Engine/Renderable/SceneNode.js"></script>
+        <script type="text/javascript" src="src/Engine/Renderable/FileTextureSupport.js"></script>
+        <script type="text/javascript" src="src/Engine/Transform/Transform.js"></script>
+        <script type="text/javascript" src="src/Engine/Transform/PivotedTransform.js"></script>
+        <script type="text/javascript" src="src/Engine/Camera/Camera.js"></script>
+        <script type="text/javascript" src="src/Engine/Camera/Camera_Mouse.js"></script>
+
+        <!-- GUI Lib -->
+        <script type="text/javascript" src="src/GUI/CSS450Timer.js"></script>
+        <script type="text/javascript" src="src/GUI/CSS450Slider.js"></script>
+        <script type="text/javascript" src="src/GUI/CSS450Xform.js"></script>
+        <script type="text/javascript" src="src/GUI/CanvasMouseSupport.js"></script>
+
+        <!-- My application code -->
+        <script type="text/javascript" src="src/MainController.js"></script>
+        <script type="text/javascript" src="src/App/MyWorld.js"></script>
+        <script type="text/javascript" src="src/App/MyWorld_CurrentObject.js"></script>
+        <script type="text/javascript" src="src/App/BodyNode.js"></script>
+          <script type="text/javascript" src="src/App/InternalBodyNode.js"></script>
+        <script type="text/javascript" src="src/App/DirectManipulation.js"></script>
+        <style type="text/css">
+            #wrap
+            {
+                width: 1210px;
+                /*background-color: rgba(0,0,0,0);*/
+            }
+            .left
+            {
+                width: 400px;
+                height: 500px;
+                outline: 1px solid;
+                background-color: rgba(25,25,25, .3);
+                float: left;
+                /*opacity: 0.3;*/
+            }
+            .right
+            {
+
+                width: 800px;
+                height: 600px;
+                outline: 1px solid;
+                background-color: rgba(25,25,25,0);
+                float: right;
+            }
+        </style>
+    </head>
+    <body
+        ng-app="appMyExample"
+        ng-controller="MainCtrl"
+        style="background-image: url('Assets/Background_image.jpg'); background-size: cover">
+        <h1 align="center">
+            X-RAY MACHINE
+        </h1>
+        <css-timer id="idMainControllerTimer" interval="40" timeron="true" 
+            callback="mainTimerHandler">
+        </css-timer>
+        <div id="wrap">
+            <div class="right">
+                <canvas
+                    ng-mousemove="serviceMove($event)"
+                    ng-mousedown="serviceDown($event)"
+                    ng-mouseup="serviceUp($event)"
+                    oncontextmenu="return false;"
+                    id="GLCanvas" width="800" height="600">
+                    <!-- GLCanvas is the area we will draw in: a 640x480 area. -->
+                    Your browser does not support the HTML5 canvas.
+                    <!-- this message will show only if WebGL clearing failed -->
+                </canvas>
+            </div>
+            <div class="left">
+                <!-- Three divisions: Title, Modes, Zoom -->
+                <div align="center" style="color: ghostwhite">
+                    <h2>X-Ray Settings</h2>
+                </div>
+                <div style="width: 400px; height: 350px; outline: 1px solid; color: ghostwhite">
+                    <h3>Mode</h3>
+                    <div>
+                        <label> 
+                            <input type="checkbox" ng-model="gXrayMode"
+                                   ng-click="serviceXrayBox()">
+                            X-Ray
+                        </label>
+                        <br>
+                        <br>
+                        <label> 
+                            <input type="checkbox" ng-model="gEditMode"
+                                   ng-click="serviceEditBox()">
+                            Adjust Patient
+                        </label>
+                        <br>
+                        <br>
+                         <label> 
+                            <input type="checkbox" ng-model="gZoomMode"
+                                   ng-click="toggleZoom()">
+                                   Toggle Zoom (Hold Right Click)
+                        </label>
+                        <br>
+                        <br>
+                        <label> 
+                            <input type="checkbox" ng-model="gSwapTexture"
+                                   ng-click="serviceSwapTexture()">
+                            Swap Textures
+                        </label>
+                        <!-- Will contain the drop list containing bone selections
+                             for highlight mode. ng-hide="gSwapTexture". Make
+                             the sentence (Choose a Bone ..) placeholder in list? 
+                        -->
+                        <br>
+                        <!--<div ng-hide="!gSwapTexture">-->
+                            <!---->
+                            <!--<label> Choose a Bone to Highlight-->
+                            <!--</label>-->
+                            <!--<select ng-model="gSelectedBone"> -->
+                               <!---->
+                                <!--<option value="1"> Tibia </option>-->
+                                <!--<option value="2"> Fibia </option>-->
+                            <!--</select>-->
+                        <!--</div>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div style="color: ghostwhite">
+        Debugging - 
+        <br>
+        Selected Bone: {{gSelectedBone}} Xray Mode: {{gXrayMode}} Edit Mode: {{gEditMode}}
+        <br>
+        Highlight Mode: {{gSwapTexture}} Canvas X: {{gCanvasX}} Y: {{gCanvasY}}
+        <br>
+        Drawing Manipulator: {{gDrawingManip}} 
+        <br>
+        Left Arm Center X: {{gLArmCenterX}} Y: {{gLArmCenterY}} 
+        <br>
+        Returned Center X: {{gRLACenter[0]}} Y: {{gRLACenter[1]}} 
+        <br>
+        Manipulator Center X: {{dDMCenter[0]}} Y: {{dDMCenter[1]}}
+        
+    </div>
+    </body>
+</html>
