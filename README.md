@@ -1,5 +1,4 @@
 # XRayMachine
-created git
 X-Ray Machine
    The X-Ray Machine offers a unique opportunity to explore the human body. The application is a powerful tool which allows you to learn how the human body is constructed. In X-Ray Mode you are provided with a view of bones, organs, and the vascular system of the body. 
 
